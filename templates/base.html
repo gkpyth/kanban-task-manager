@@ -4,8 +4,244 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS Sentinel</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons - lightweight icon library -->
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>CS Sentinel - Board Coming Soon</h1>
+
+    <!-- ==================== SIDEBAR NAVIGATION ==================== -->
+    <nav class="sidebar">
+        <!-- App branding -->
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="ph ph-shield-chevron"></i>
+            </div>
+            <span class="brand-name">CS Sentinel</span>
+        </div>
+
+        <!-- Navigation links -->
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="nav-link active" data-view="board">
+                    <i class="ph ph-kanban"></i>
+                    <span>Tasks</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-link" data-view="customers">
+                    <i class="ph ph-users-three"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-link" data-view="dashboard">
+                    <i class="ph ph-chart-bar"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Sidebar footer -->
+        <div class="sidebar-footer">
+            <span class="version-tag">Phase 1</span>
+        </div>
+    </nav>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="main-content">
+
+        <!-- Top toolbar -->
+        <header class="toolbar">
+            <div class="toolbar-left">
+                <h1 class="page-title">Tasks</h1>
+                <!-- View switcher - Board / Timeline / Calendar (Timeline & Calendar in Phase 2) -->
+                <div class="view-switcher">
+                    <button class="view-btn active" data-view="board">
+                        <i class="ph ph-kanban"></i> Board
+                    </button>
+                    <button class="view-btn" data-view="timeline" disabled title="Coming in Phase 2">
+                        <i class="ph ph-chart-bar-horizontal"></i> Timeline
+                    </button>
+                    <button class="view-btn" data-view="calendar" disabled title="Coming in Phase 2">
+                        <i class="ph ph-calendar-blank"></i> Calendar
+                    </button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <!-- Filter and search controls -->
+                <div class="filter-group">
+                    <button class="filter-btn" id="filterPriority">
+                        <i class="ph ph-funnel"></i> Priority
+                    </button>
+                    <button class="filter-btn" id="filterTags">
+                        <i class="ph ph-tag"></i> Tags
+                    </button>
+                    <div class="search-box">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search tasks...">
+                    </div>
+                </div>
+                <!-- Create new task button -->
+                <button class="btn-primary" id="addTaskBtn">
+                    <i class="ph ph-plus"></i> New Task
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================== KANBAN BOARD ==================== -->
+        <div class="board-container">
+            <!-- To Do Column -->
+            <div class="kanban-column" data-status="To Do">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="status-dot todo"></span>
+                        <h2>To Do</h2>
+                        <span class="task-count" id="countTodo">0</span>
+                    </div>
+                </div>
+                <div class="task-list" data-status="To Do">
+                    <!-- Task cards will be injected here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div class="kanban-column" data-status="In Progress">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="status-dot in-progress"></span>
+                        <h2>In Progress</h2>
+                        <span class="task-count" id="countInProgress">0</span>
+                    </div>
+                </div>
+                <div class="task-list" data-status="In Progress">
+                    <!-- Task cards will be injected here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Done Column -->
+            <div class="kanban-column" data-status="Done">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="status-dot done"></span>
+                        <h2>Done</h2>
+                        <span class="task-count" id="countDone">0</span>
+                    </div>
+                </div>
+                <div class="task-list" data-status="Done">
+                    <!-- Task cards will be injected here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== CREATE TASK MODAL ==================== -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">New Task</h2>
+                <button class="modal-close" id="closeModal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" rows="3" placeholder="Add details..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskStatus">Status</label>
+                        <select id="taskStatus">
+                            <option value="To Do" selected>To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tag-selector" id="tagSelector">
+                        <!-- Tags will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelTask">Cancel</button>
+                <button class="btn-primary" id="saveTask">Create Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TASK DETAIL SLIDE-OUT PANEL ==================== -->
+    <div class="slide-panel-overlay" id="detailOverlay">
+        <div class="slide-panel" id="detailPanel">
+            <div class="panel-header">
+                <h2 id="detailTitle">Task Details</h2>
+                <div class="panel-actions">
+                    <button class="icon-btn" id="editTaskBtn" title="Edit task">
+                        <i class="ph ph-pencil-simple"></i>
+                    </button>
+                    <button class="icon-btn danger" id="deleteTaskBtn" title="Delete task">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                    <button class="icon-btn" id="closePanel">
+                        <i class="ph ph-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="detail-field">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value" id="detailStatus"></span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Priority</span>
+                    <span class="detail-value" id="detailPriority"></span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Due Date</span>
+                    <span class="detail-value" id="detailDueDate"></span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Description</span>
+                    <p class="detail-description" id="detailDescription"></p>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Tags</span>
+                    <div class="detail-tags" id="detailTags"></div>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-label">Created</span>
+                    <span class="detail-value" id="detailCreated"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

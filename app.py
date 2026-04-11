@@ -12,6 +12,10 @@ def create_app():
     # Connect SQLAlchemy database instance to this Flask app
     db.init_app(app)
 
+    # Register the routes blueprint so Flask knows about our endpoints
+    from routes import main
+    app.register_blueprint(main)
+
     # Create database tables if they don't exist yet
     # app_context() tells Flask which app we're working with
     with app.app_context():

@@ -5,11 +5,15 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 
+# Base class required by Flask-SQLAlchemy (ver 3.x) for model definitions
 class Base(DeclarativeBase):
     pass
 
+# Create the database instance with the Base class
 db = SQLAlchemy(model_class=Base)
 
+# Create a bridge table for many-to-many relationship between tasks and tags
+# Use Table instead of Model because it only holds foreign keys - no extra data needed
 task_tags = Table('task_tags',
     db.metadata,
     Column('task_id', Integer, ForeignKey('tasks.id'), primary_key=True),
@@ -30,9 +34,14 @@ class Task(db.Model):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc),
                                                  onupdate=lambda: datetime.now(timezone.utc))
 
+    # Relationship to tags through the bridge table
+    # secondary = which bridge table to use
+    # backref = creates reverse access to automatically enable access (tag.tasks)
+    # lazy = 'dynamic' = don't load all related tasks immediately but return a filterable query instead
     tags: Mapped[List['Tag']] = relationship('Tag', secondary=task_tags,
                                              backref=db.backref('tasks', lazy='dynamic'))
 
+    # Controls what prints when debugging (e.g. <Task Onboarding Kickoff>)
     def __repr__(self):
         return f'<Task {self.title}>'
 
@@ -40,7 +49,11 @@ class Tag(db.Model):
     __tablename__ = 'tags'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    # Ensure Tag names are unique
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+
+    # Hex color code for visual display on the board with gray being the default
     color: Mapped[str] = mapped_column(String(7), nullable=False, default='#6B7280')
 
     def __repr__(self):

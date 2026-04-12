@@ -79,43 +79,42 @@
                 <!-- Filter and search controls -->
                 <div class="filter-group">
                     <!-- Priority dropdown filter -->
-                        <div class="dropdown" id="priorityDropdown">
-                            <button class="filter-btn" id="filterPriority">
-                                <i class="ph ph-funnel"></i> Priority
-                            </button>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" data-value="">All Priorities</div>
-                                <div class="dropdown-item" data-value="High">
-                                    <span class="priority-dot high"></span> High
-                                </div>
-                                <div class="dropdown-item" data-value="Medium">
-                                    <span class="priority-dot medium"></span> Medium
-                                </div>
-                                <div class="dropdown-item" data-value="Low">
-                                    <span class="priority-dot low"></span> Low
-                                </div>
+                    <div class="dropdown" id="priorityDropdown">
+                        <button class="filter-btn" id="filterPriority">
+                            <i class="ph ph-funnel"></i> Priority
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" data-value="">All Priorities</div>
+                            <div class="dropdown-item" data-value="High">
+                                <span class="priority-dot high"></span> High
                             </div>
-                        </div>
-
-                        <!-- Tags dropdown filter -->
-                        <div class="dropdown" id="tagsDropdown">
-                            <button class="filter-btn" id="filterTags">
-                                <i class="ph ph-tag"></i> Tags
-                            </button>
-                            <div class="dropdown-menu" id="tagsDropdownMenu">
-                                <div class="dropdown-item" data-value="">All Tags</div>
-                                <!-- Tag options will be injected by JavaScript -->
+                            <div class="dropdown-item" data-value="Medium">
+                                <span class="priority-dot medium"></span> Medium
                             </div>
-                        </div>
-
-                        <div class="search-box">
-                            <i class="ph ph-magnifying-glass"></i>
-                            <input type="text" id="searchInput" placeholder="Search tasks...">
+                            <div class="dropdown-item" data-value="Low">
+                                <span class="priority-dot low"></span> Low
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Tags dropdown filter -->
+                    <div class="dropdown" id="tagsDropdown">
+                        <button class="filter-btn" id="filterTags">
+                            <i class="ph ph-tag"></i> Tags
+                        </button>
+                        <div class="dropdown-menu" id="tagsDropdownMenu">
+                            <div class="dropdown-item" data-value="">All Tags</div>
+                            <!-- Tag options will be injected by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search tasks...">
+                    </div>
                 </div>
-                <!-- Create new task button -->
+
+                <!-- Create New Task button -->
                 <button class="btn-primary" id="addTaskBtn">
                     <i class="ph ph-plus"></i> New Task
                 </button>
@@ -279,9 +278,16 @@
                     <span class="detail-label">Created</span>
                     <span class="detail-value" id="detailCreated"></span>
                 </div>
+                <div class="detail-field">
+                    <span class="detail-label">Updated</span>
+                    <span class="detail-value" id="detailUpdated"></span>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <!-- SortableJS - handles drag and drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

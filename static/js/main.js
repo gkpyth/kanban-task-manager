@@ -55,6 +55,7 @@ const elements = {
     detailDescription: document.getElementById('detailDescription'),
     detailTags: document.getElementById('detailTags'),
     detailCreated: document.getElementById('detailCreated'),
+    detailUpdated: document.getElementById('detailUpdated'),
 
     // Toolbar
     searchInput: document.getElementById('searchInput'),
@@ -147,6 +148,7 @@ async function saveTask(taskData) {
             // Refresh the board with the updated data
             await fetchTasks();
             closeTaskModal();
+            showToast(isEditing ? 'Task updated' : 'Task created');
         }
     } catch (error) {
         console.error('Failed to save task:', error);
@@ -166,6 +168,7 @@ async function deleteTask(taskId) {
         if (response.ok) {
             await fetchTasks();
             closeDetailPanel();
+            showToast('Task deleted');
         }
     } catch (error) {
         console.error('Failed to delete task:', error);
@@ -566,10 +569,19 @@ function openDetailPanel(taskId) {
         })
         : '—';
 
-    // Format created date
+    // Format created date with timestamp
     elements.detailCreated.textContent = task.created_at
         ? new Date(task.created_at).toLocaleDateString('en-US', {
-            month: 'long', day: 'numeric', year: 'numeric'
+            month: 'long', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit'
+        })
+        : '—';
+
+    // Format updated date with timestamp
+    elements.detailUpdated.textContent = task.updated_at
+        ? new Date(task.updated_at).toLocaleDateString('en-US', {
+            month: 'long', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit'
         })
         : '—';
 
@@ -675,6 +687,36 @@ function initSortable() {
             }
         });
     });
+}
+
+
+// ==================== TOAST NOTIFICATIONS ====================
+
+/**
+ * Show a brief notification at the bottom-right of the screen
+ * @param {string} message - text to display
+ * @param {string} type - 'success' or 'error'
+ */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+
+    // Pick the icon based on type
+    const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
+
+    // Create the toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="ph ${icon}"></i> ${message}`;
+
+    // Add it to the container
+    container.appendChild(toast);
+
+    // Auto-remove after 3 seconds with a fade-out animation
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.25s ease forwards';
+        // Remove from DOM after animation completes
+        setTimeout(() => toast.remove(), 250);
+    }, 3000);
 }
 
 

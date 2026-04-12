@@ -32,6 +32,8 @@ def get_tasks():
             'priority': task.priority,
             'due_date': task.due_date.isoformat() if task.due_date else None,
             'position': task.position,
+            'created_at': task.created_at.isoformat() + 'Z' if task.created_at else None,
+            'updated_at': task.updated_at.isoformat() + 'Z' if task.updated_at else None,
             'tags': [{'id': tag.id, 'name': tag.name, 'color': tag.color} for tag in task.tags]
         })
 
@@ -87,6 +89,8 @@ def update_task(task_id):
     # Find the task or return 404 if it doesn't exist
     task = Task.query.get_or_404(task_id)
     data = request.json
+    print('Update data received:', data)
+    print('Due date value:', data.get('due_date'))
 
     # Update only the fields that were provided - .get() returns None if not provided
     task.title = data.get('title', task.title)
@@ -97,7 +101,8 @@ def update_task(task_id):
 
     # Parse due_date string into a Python date object
     if 'due_date' in data:
-        task.due_data = datetime.strptime(data['due_date'], '%Y-%m-%d').date() if data['due_date'] else None
+        task.due_date = datetime.strptime(data['due_date'], '%Y-%m-%d').date() if data['due_date'] else None
+        print('Due date set to:', task.due_date)
 
     # Replace all tags if new ones were provided
     if 'tag_ids' in data:
@@ -105,6 +110,7 @@ def update_task(task_id):
         task.tags = tags
 
     db.session.commit()
+    print('Due date after commit:', task.due_date)
 
     return jsonify({
         'id': task.id,

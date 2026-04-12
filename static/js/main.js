@@ -41,7 +41,6 @@ const elements = {
     taskPriority: document.getElementById('taskPriority'),
     taskStatus: document.getElementById('taskStatus'),
     taskDueDate: document.getElementById('taskDueDate'),
-    tagSelector: document.getElementById('tagSelector'),
 
     // Detail slide-out panel
     detailOverlay: document.getElementById('detailOverlay'),
@@ -381,7 +380,7 @@ function openCreateModal() {
     elements.saveTask.textContent = 'Create Task';
 
     // Render tag options in the modal
-    renderTagSelector();
+    renderSelectedTags();
 
     // Show the modal by adding the 'active' class
     // classList.add() and classList.remove() is how things can be shown/hidden
@@ -422,7 +421,7 @@ function openEditModal(taskId) {
     elements.saveTask.textContent = 'Save Changes';
 
     // Render tag options with current tags pre-selected
-    renderTagSelector();
+    renderSelectedTags();
 
     // Show the modal
     elements.taskModal.classList.add('active');
@@ -438,50 +437,79 @@ function closeTaskModal() {
 }
 
 
-// Render clickable tag options inside the modal form
+// Render selected tags as removable pills above the Add Tag button
 
-function renderTagSelector() {
-    // Build a clickable pill for each tag
-    elements.tagSelector.innerHTML = state.tags.map(tag => {
-        // Check if this tag is already selected
-        const isSelected = state.selectedTags.includes(tag.id);
+function renderSelectedTags() {
+    const display = document.getElementById('selectedTagsDisplay');
+
+    // Build a pill for each selected tag with an X button to remove it
+    display.innerHTML = state.selectedTags.map(tagId => {
+        const tag = state.tags.find(t => t.id === tagId);
+        if (!tag) return '';
         return `
-            <span class="tag-option ${isSelected ? 'selected' : ''}"
-                  data-id="${tag.id}"
-                  style="background: ${tag.color}20; color: ${tag.color};">
+            <span class="selected-tag-pill" style="background: ${tag.color}20; color: ${tag.color};">
                 ${tag.name}
+                <span class="remove-tag" data-id="${tag.id}">
+                    <i class="ph ph-x"></i>
+                </span>
             </span>
         `;
     }).join('');
 
-    // Attach click listeners to each tag pill
-    elements.tagSelector.querySelectorAll('.tag-option').forEach(option => {
-        option.addEventListener('click', () => {
-            const tagId = parseInt(option.dataset.id);
-            toggleTagSelection(tagId);
+    // Attach click listeners to each remove button
+    display.querySelectorAll('.remove-tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tagId = parseInt(btn.dataset.id);
+            // Remove this tag from selected tags
+            state.selectedTags = state.selectedTags.filter(id => id !== tagId);
+            // Re-render pills and dropdown to reflect the change
+            renderSelectedTags();
         });
     });
 }
 
 
+// Render the tag options inside the Add Tag dropdown
+// Filters out already-selected tags and applies search filtering
 
-// Toggle a tag's selected state in the modal
-// @param {number} tagId - ID of the tag to toggle
+function renderTagDropdownList(searchText = '') {
+    const list = document.getElementById('tagDropdownList');
 
-function toggleTagSelection(tagId) {
-    // If already selected, remove it. If not, add it.
-    const index = state.selectedTags.indexOf(tagId);
-    if (index > -1) {
-        // splice removes 1 item at the given index
-        // .splice(index, num) removes an item from an array starting at a specific position - <num> specifies how many
-        // similar to Python's list.pop(index) except having to specify the numbers of items to be removed
-        state.selectedTags.splice(index, 1);
-    } else {
-        state.selectedTags.push(tagId);
+    // Filter out tags that are already selected
+    // Then filter by search text if provided
+    const availableTags = state.tags.filter(tag => {
+        const notSelected = !state.selectedTags.includes(tag.id);
+        const matchesSearch = tag.name.toLowerCase().includes(searchText.toLowerCase());
+        return notSelected && matchesSearch;
+    });
+
+    if (availableTags.length === 0) {
+        list.innerHTML = `
+            <div class="dropdown-item" style="color: var(--text-muted); cursor: default;">
+                ${searchText ? 'No matching tags' : 'All tags assigned'}
+            </div>
+        `;
+        return;
     }
 
-    // Re-render to update visual state
-    renderTagSelector();
+    // Build dropdown items for available tags
+    list.innerHTML = availableTags.map(tag => `
+        <div class="dropdown-item" data-id="${tag.id}">
+            <span class="task-tag" style="background: ${tag.color}20; color: ${tag.color};">${tag.name}</span>
+        </div>
+    `).join('');
+
+    // Click a tag to select it
+    list.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const tagId = parseInt(item.dataset.id);
+            state.selectedTags.push(tagId);
+            renderSelectedTags();
+            renderTagDropdownList();
+            // Close dropdown after selection
+            document.getElementById('tagSelectorDropdown').classList.remove('open');
+        });
+    });
 }
 
 
@@ -703,44 +731,133 @@ elements.searchInput.addEventListener('input', (e) => {
     renderBoard();
 });
 
-// Priority filter button - cycles through: All -> High -> Medium -> Low -> All
-elements.filterPriority.addEventListener('click', () => {
-    const priorities = [null, 'High', 'Medium', 'Low'];
-    // Find current position in the cycle
-    const currentIndex = priorities.indexOf(state.filters.priority);
-    // Move to next, wrap around to 0 if at the end
-    // % operator is the same as Python's % operator. Same concept to wrap around to 0 when the end is reached
-    const nextIndex = (currentIndex + 1) % priorities.length;
-    state.filters.priority = priorities[nextIndex];
+// Add Tag dropdown toggle
+document.getElementById('addTagDropdownBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllDropdowns();
 
-    // Update button text to show current filter
+    // Render available tags and open the dropdown
+    renderTagDropdownList();
+
+    const dropdown = document.getElementById('tagSelectorDropdown');
+    const btn = document.getElementById('addTagDropdownBtn');
+    const menu = dropdown.querySelector('.dropdown-menu');
+
+    // Position the dropdown relative to the button using fixed positioning
+    // getBoundingClientRect() returns the button's exact position on screen
+    const rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.left = rect.left + 'px';
+    menu.style.width = '220px';
+
+    dropdown.classList.toggle('open');
+    document.getElementById('tagSearchInput').focus();
+});
+
+// Tag search input - filter tags as user types
+document.getElementById('tagSearchInput').addEventListener('input', (e) => {
+    renderTagDropdownList(e.target.value);
+});
+
+// Prevent typing in tag search from closing the dropdown
+document.getElementById('tagSearchInput').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+// ==================== DROPDOWN FILTERS ====================
+
+// Toggle priority dropdown open/closed
+elements.filterPriority.addEventListener('click', (e) => {
+    // Stop the click from reaching the document listener that closes dropdowns
+    e.stopPropagation();
+    // Close other dropdowns first
+    closeAllDropdowns();
+    document.getElementById('priorityDropdown').classList.toggle('open');
+});
+
+// Toggle tags dropdown open/closed
+elements.filterTags.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    // Populate tag options before opening
+    renderTagsDropdown();
+    document.getElementById('tagsDropdown').classList.toggle('open');
+});
+
+// Handle priority dropdown item clicks
+document.getElementById('priorityDropdown').addEventListener('click', (e) => {
+    // .closest() finds the nearest parent matching the selector
+    // Useful when clicking on a child element (like the priority dot) inside the item
+    const item = e.target.closest('.dropdown-item');
+    if (!item) return;
+
+    // Get the priority value from the data-value attribute
+    const value = item.dataset.value;
+    state.filters.priority = value || null;
+
+    // Update button text
     const label = state.filters.priority || 'Priority';
     elements.filterPriority.innerHTML = `<i class="ph ph-funnel"></i> ${label}`;
-
-    // Toggle active styling
     elements.filterPriority.classList.toggle('active', state.filters.priority !== null);
 
+    // Mark the selected item as active
+    item.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    // Close dropdown and re-render
+    closeAllDropdowns();
     renderBoard();
 });
 
-// Tag filter button - cycles through all available tags
-elements.filterTags.addEventListener('click', () => {
-    // Build cycle: null (all) -> tag1 -> tag2 -> ... -> null
-    // ... is the spread operator in JS. It unpacks an array into individual items like Python's * unpacking
-    const tagIds = [null, ...state.tags.map(t => t.id)];
-    const currentIndex = tagIds.indexOf(state.filters.tagId);
-    const nextIndex = (currentIndex + 1) % tagIds.length;
-    state.filters.tagId = tagIds[nextIndex];
+// Handle tags dropdown item clicks
+document.getElementById('tagsDropdownMenu').addEventListener('click', (e) => {
+    const item = e.target.closest('.dropdown-item');
+    if (!item) return;
 
-    // Find the tag name for display
+    const value = item.dataset.value;
+    state.filters.tagId = value ? parseInt(value) : null;
+
+    // Find tag name for display
     const activeTag = state.tags.find(t => t.id === state.filters.tagId);
     const label = activeTag ? activeTag.name : 'Tags';
     elements.filterTags.innerHTML = `<i class="ph ph-tag"></i> ${label}`;
-
     elements.filterTags.classList.toggle('active', state.filters.tagId !== null);
 
+    // Mark selected
+    item.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    closeAllDropdowns();
     renderBoard();
 });
+
+// Close all dropdowns when clicking anywhere else on the page
+document.addEventListener('click', () => {
+    closeAllDropdowns();
+});
+
+/**
+ * Close all open dropdowns
+ */
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+}
+
+/**
+ * Populate the tags dropdown with current tags from state
+ */
+function renderTagsDropdown() {
+    const menu = document.getElementById('tagsDropdownMenu');
+    // Keep the "All Tags" option, rebuild the rest
+    menu.innerHTML = `
+        <div class="dropdown-item ${state.filters.tagId === null ? 'active' : ''}" data-value="">All Tags</div>
+        ${state.tags.map(tag => `
+            <div class="dropdown-item ${state.filters.tagId === tag.id ? 'active' : ''}" data-value="${tag.id}">
+                <span class="task-tag" style="background: ${tag.color}20; color: ${tag.color};">${tag.name}</span>
+            </div>
+        `).join('')}
+    `;
+}
 
 // Keyboard shortcut - press Escape to close modal or panel
 document.addEventListener('keydown', (e) => {

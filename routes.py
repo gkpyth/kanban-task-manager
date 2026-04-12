@@ -58,13 +58,16 @@ def create_task():
         position=max_position + 1
     )
 
+    # Add and flush first so the task gets an ID assigned
+    db.session.add(new_task)
+    db.session.flush()
+
     # Handle tags if any were provided
-    if data.get('tag_id'):
+    if data.get('tag_ids'):
         # Fetch all tag objects matching the provided IDs
         tags = Tag.query.filter(Tag.id.in_(data['tag_ids'])).all()
         new_task.tags = tags
 
-    db.session.add(new_task)
     db.session.commit()
 
     return jsonify({

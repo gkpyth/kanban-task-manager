@@ -6,7 +6,7 @@ class Config:
 
     # Database location - SQLite file stored in the instance folder
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'cs_sentinel.db')
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'kando.db')
 
     # Disable modification tracking to save on memory usage
     SQLALCHEMY_TRACK_MODIFICATIONS = False

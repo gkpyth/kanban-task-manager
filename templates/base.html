@@ -22,36 +22,24 @@
         <!-- App branding -->
         <div class="sidebar-brand">
             <div class="brand-icon">
-                <i class="ph ph-shield-chevron"></i>
+                <i class="ph ph-kanban"></i>
             </div>
-            <span class="brand-name">CS Sentinel</span>
+            <span class="brand-name">KanDo</span>
         </div>
 
         <!-- Navigation links -->
         <ul class="nav-links">
             <li>
                 <a href="#" class="nav-link active" data-view="board">
-                    <i class="ph ph-kanban"></i>
-                    <span>Tasks</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-link" data-view="customers">
-                    <i class="ph ph-users-three"></i>
-                    <span>Customers</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-link" data-view="dashboard">
-                    <i class="ph ph-chart-bar"></i>
-                    <span>Dashboard</span>
+                    <i class="ph ph-columns"></i>
+                    <span>Board</span>
                 </a>
             </li>
         </ul>
 
         <!-- Sidebar footer -->
         <div class="sidebar-footer">
-            <span class="version-tag">Phase 1</span>
+            <p class="footer-text">Built with Python, Flask, SQLAlchemy &amp; JavaScript by <span class="footer-author">Ghaleb Khadra</span> &middot; {{ current_year }}</p>
         </div>
     </nav>
 
@@ -61,19 +49,7 @@
         <!-- Top toolbar -->
         <header class="toolbar">
             <div class="toolbar-left">
-                <h1 class="page-title">Tasks</h1>
-                <!-- View switcher - Board / Timeline / Calendar (Timeline & Calendar in Phase 2) -->
-                <div class="view-switcher">
-                    <button class="view-btn active" data-view="board">
-                        <i class="ph ph-kanban"></i> Board
-                    </button>
-                    <button class="view-btn" data-view="timeline" disabled title="Coming in Phase 2">
-                        <i class="ph ph-chart-bar-horizontal"></i> Timeline
-                    </button>
-                    <button class="view-btn" data-view="calendar" disabled title="Coming in Phase 2">
-                        <i class="ph ph-calendar-blank"></i> Calendar
-                    </button>
-                </div>
+                <h1 class="page-title">Board</h1>
             </div>
             <div class="toolbar-right">
                 <!-- Filter and search controls -->

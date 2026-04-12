@@ -1,6 +1,7 @@
 from flask import Flask
 from config import Config
 from models import db
+from datetime import datetime
 
 def create_app():
     """Application factory - builds and configures the Flask app"""
@@ -15,6 +16,11 @@ def create_app():
     # Register the routes blueprint so Flask knows about our endpoints
     from routes import main
     app.register_blueprint(main)
+
+    # Make current_year available to all templates automatically
+    @app.context_processor
+    def inject_year():
+        return {'current_year': datetime.now().year}
 
     # Create database tables if they don't exist yet
     # app_context() tells Flask which app we're working with

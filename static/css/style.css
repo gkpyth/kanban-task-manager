@@ -874,12 +874,15 @@ body {
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
     z-index: 200;
-    display: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.25s, opacity 0.25s ease;
     backdrop-filter: blur(2px);
 }
 
 .slide-panel-overlay.active {
-    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 .slide-panel {

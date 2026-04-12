@@ -294,21 +294,42 @@ function createTaskCardHTML(task) {
     // Format the due date for display
     const dueDateHTML = task.due_date ? formatDueDate(task.due_date) : '';
 
-    // Build tag pills HTML
-    const tagsHTML = task.tags.map(tag =>
-        `<span class="task-tag" style="background: ${tag.color}20; color: ${tag.color};">${tag.name}</span>`
-    ).join('');
+    // Build tags section with label - only if tags exist
+    // Wrapping in task-card-field gives us the "Tags:" label on the left
+    const tagsHTML = task.tags.length > 0
+        ? `<div class="task-card-field">
+               <span class="task-card-label">Tags</span>
+               <div class="task-card-tags">
+                   ${task.tags.map(tag =>
+                       `<span class="task-tag" style="background: ${tag.color}20; color: ${tag.color};">${tag.name}</span>`
+                   ).join('')}
+               </div>
+           </div>`
+        : '';
 
-    // Return the complete card HTML
-    // data-id stores the task ID so I can reference it later
+    // Build the complete card HTML
+    // Priority and Due Date share a row - priority left, due date right
+    // Tags get their own row below
     return `
         <div class="task-card priority-${task.priority.toLowerCase()}" data-id="${task.id}">
             <div class="task-card-title">${task.title}</div>
-            <div class="task-card-meta">
-                <span class="task-card-priority ${task.priority.toLowerCase()}">${task.priority}</span>
-                ${dueDateHTML}
+
+            <!-- Priority and Due Date on the same row -->
+            <div class="task-card-row">
+                <div class="task-card-field">
+                    <span class="task-card-label">Priority</span>
+                    <span class="task-card-priority ${task.priority.toLowerCase()}">${task.priority}</span>
+                </div>
+                ${dueDateHTML ? `
+                    <div class="task-card-field">
+                        <span class="task-card-label">Due</span>
+                        ${dueDateHTML}
+                    </div>
+                ` : ''}
             </div>
-            ${tagsHTML ? `<div class="task-card-tags">${tagsHTML}</div>` : ''}
+
+            <!-- Tags field - only rendered if tags exist -->
+            ${tagsHTML}
         </div>
     `;
 }

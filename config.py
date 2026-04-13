@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 class Config:
     # Secret key for session security - checks environment variable first and falls back to a dev key if not set
